@@ -1,0 +1,94 @@
+---
+# tasks file for conesphere.debian_kickoff_setup
+#
+#TO BE CHANGED FOR CENTOS!!!!!!
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+- name: Add epel repository
+  yum_repository:
+    name: epel
+    description: EPEL YUM repo
+    baseurl: https://download.fedoraproject.org/pub/epel/$releasever/$basearch/
+- name: install packages 
+  yum: 
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - btrfs-progs
+    - acpid
+    - qemu-guest-agent
+    - vim
+    - screen
+    - tmux
+    - openssh-server
+      #   - cloud-initramfs-growroot
+    - net-tools
+    - git
+      #- sshguard
+      #- firmware-linux
+      #- firmware-linux-nonfree
+      #- apt-transport-https
+    - python34-jinja2
+    - python34-PyYaml
+#- template:
+#   src: templates/etc-network-interfaces.j2
+#   dest: /etc/network/interfaces
+#   mode: "0644"
+#   owner: root
+#   group: root
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+- template:
+   src: templates/sshd_config.j2
+   dest: /etc/ssh/sshd_config
+   mode: "0644"
+   owner: root
+   group: root
+- template:
+   src: templates/ssh_config.j2
+   dest: /etc/ssh/ssh_config
+   mode: "0644"
+   owner: root
+   group: root
+- name: make /tmp a tmpfs if it isnt one yet
+  lineinfile:
+    name: /etc/fstab
+    regexp: '^tmpfs'
+    line: 'tmpfs /tmp tmpfs rw,nosuid,mode=1777 0 0'
+- file:
+   path: "/media/fd0"
+   state: directory
+   owner: root
+   group: root
+   mode: "0755"
+- name: make a floppy entry available 
+  lineinfile:
+    name: /etc/fstab
+    regexp: '^/dev/fd0'
+    line: '/dev/fd0 /media/fd0  ext2,vfat   ro,noauto,noexec,nosuid,dmask=077,fmask=177  0 0'
+- name: copy kickoff scripts 
+  copy:
+    src: files/kickoff
+    dest: /etc
+- name: copy debian_kickoff service
+  copy:
+    src: files/kickoff.service
+    dest: /etc/systemd/system/kickoff.service
+- file:
+   path: "/etc/kickoff/kickoff.sh"
+   state: file
+   owner: root
+   group: root
+   mode: "0755"
+- file:
+   path: "/etc/kickoff/jinja2proc.py"
+   state: file
+   owner: root
+   group: root
+   mode: "0755"
+- name: enable kickoff.service
+  args:
+    executable: /bin/bash
+  shell: |
+    systemctl enable kickoff
+- copy:
+   src: "init_machine-id"
+   dest: "/etc/machine-id"

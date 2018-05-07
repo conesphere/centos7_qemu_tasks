@@ -1,0 +1,14 @@
+[Unit]
+Description=First Boot Kickoff
+After=systemd-remount-fs.service
+Before=network-pre.target network.target network-online.target network.service
+ConditionPathExists=/dev/fd0
+ConditionPathExists=!/etc/kickoff/kicked
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/etc/kickoff/kickoff.sh
+
+[Install]
+WantedBy=basic.target

@@ -1,0 +1,24 @@
+# This file describes the network interfaces available on your system
+# and how to activate them. For more information, see interfaces(5).
+
+source /etc/network/interfaces.d/*
+
+# The loopback network interface
+auto lo
+iface lo inet loopback
+
+allow-hotplug ens3
+iface ens3 inet dhcp
+
+allow-hotplug ens9
+iface ens9 inet dhcp
+
+# it is called predictable network interface names because 
+# they might unpredictably change on a software update 
+allow-hotplug enp0s3
+iface enp0s3 inet dhcp
+
+allow-hotplug enp0s9
+iface enp0s9 inet dhcp
+
+
